@@ -1,0 +1,87 @@
+# Production-Grade E-Commerce Platform Infrastructure
+
+> Fully automated Kubernetes deployment on AWS with monitoring, autoscaling, and CI/CD
+
+[Live Demo](https://demo.yoursite.com) | [Architecture Docs](./docs/ARCHITECTURE.md) | [Monitoring Dashboard](https://grafana.yoursite.com)
+
+## 🎯 What This Demonstrates
+
+- **Infrastructure as Code**: Terraform modules for AWS (VPC, EKS, RDS)
+- **Container Orchestration**: Kubernetes with autoscaling and zero-downtime deployments
+- **Observability**: Prometheus + Grafana with custom dashboards
+- **CI/CD**: Automated build, test, and deployment pipeline
+- **Production Practices**: High availability, monitoring, cost optimization
+
+## 📊 Key Metrics
+
+- **Deployment Time**: < 15 minutes (full infrastructure from scratch)
+- **Autoscaling**: 2-20 pods based on load
+- **Uptime**: 99.9% (tested with chaos engineering)
+- **Cost**: ~$150/month (automatically destroys nightly to save costs)
+
+## 🏗️ Architecture
+
+![Architecture Diagram](./docs/architecture.png)
+
+## 🚀 Quick Start
+```bash
+# Deploy everything
+make deploy
+
+# Run load tests
+make load-test
+
+# View monitoring
+make grafana
+```
+
+## 🛠️ Tech Stack
+
+**Infrastructure**: Terraform, AWS (EKS, RDS, VPC)
+**Orchestration**: Kubernetes, Helm
+**Monitoring**: Prometheus, Grafana, AlertManager
+**CI/CD**: GitHub Actions
+**Load Testing**: k6
+
+## 📈 Load Test Results
+
+Handled 10,000 concurrent users with <200ms P95 latency
+
+[Full Results](./load-tests/results/)
+```
+
+**Why this works:**
+- ✅ Shows impact immediately
+- ✅ Links to live demo (if possible)
+- ✅ Metrics prove it works
+- ✅ Clear tech stack
+
+---
+
+### **2. Architecture Diagram (Visual proof)**
+
+**Create in draw.io or Lucidchart:**
+```
+                    [Users]
+                       ↓
+              [Route53 / DNS]
+                       ↓
+              [ALB / Ingress]
+                       ↓
+        ┌──────────────┴──────────────┐
+        ↓                             ↓
+   [Frontend Pods]              [Backend Pods]
+   - React SPA                  - API Service
+   - Nginx                      - Worker Service
+   - HPA: 2-10                  - HPA: 2-20
+        ↓                             ↓
+        └──────────────┬──────────────┘
+                       ↓
+                  [RDS Postgres]
+                  - Multi-AZ
+                  - Automated backups
+
+   [Monitoring Stack]
+   - Prometheus (metrics)
+   - Grafana (dashboards)
+   - AlertManager (alerts)

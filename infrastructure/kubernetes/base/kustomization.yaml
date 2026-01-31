@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - frontend/deployment.yaml
+  - backend/deployment.yaml
+  - database/statefulset.yaml
+  - ingress.yaml
+
+namespace: default
+
+commonLabels:
+  project: platform-showcase
+  managed-by: kustomize
+
+commonAnnotations:
+  version: "1.0.0"

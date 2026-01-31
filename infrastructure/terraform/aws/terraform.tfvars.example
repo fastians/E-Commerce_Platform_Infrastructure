@@ -1,0 +1,35 @@
+# Example Terraform Variables
+# Copy this file to terraform.tfvars and customize for your deployment
+
+# AWS Configuration
+region           = "us-east-1"
+cluster_name     = "demo-eks-cluster"
+environment      = "production"
+
+# VPC Configuration
+vpc_cidr           = "10.0.0.0/16"
+availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
+
+# EKS Node Configuration
+instance_type  = "t3.medium"  # t3.small for cost savings, t3.medium for better performance
+min_nodes      = 2
+max_nodes      = 10
+desired_nodes  = 2
+
+# Cost Optimization
+enable_spot_instances = true  # Use spot instances to save ~70% on compute costs
+
+# Database Configuration
+enable_rds         = false  # Set to true to use RDS PostgreSQL (adds ~$30/month)
+db_instance_class  = "db.t3.small"
+db_name            = "ecommerce"
+db_username        = "dbadmin"
+# db_password      = ""  # Leave empty to auto-generate, or set a secure password
+
+# Tags
+tags = {
+  Project     = "platform-showcase"
+  ManagedBy   = "terraform"
+  Owner       = "your-name"
+  CostCenter  = "demo"
+}
