@@ -1,8 +1,8 @@
-# Production-Grade E-Commerce Platform Infrastructure
+# E-Commerce Platform Infrastructure
 
 > Fully automated Kubernetes deployment on AWS with monitoring, autoscaling, and CI/CD
 
-[Live Demo](https://demo.yoursite.com) | [Architecture Docs](./docs/ARCHITECTURE.md) | [Monitoring Dashboard](https://grafana.yoursite.com)
+[Live Demo](https://.README.md) | [Architecture Docs](./docs/ARCHITECTURE.md) | [Monitoring Dashboard](https://.README.md)
 
 ## 🎯 What This Demonstrates
 
@@ -112,10 +112,6 @@ platform-showcase/
 ### Deployment
 
 1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/platform-showcase.git
-   cd platform-showcase
-   ```
 
 2. **Configure AWS credentials**
    ```bash
@@ -164,4 +160,3 @@ MIT License - feel free to use this as a reference for your own projects.
 
 ---
 
-**Built with ❤️ to showcase production-grade DevOps practices**
