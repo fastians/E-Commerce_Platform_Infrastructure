@@ -1,0 +1,94 @@
+name: Deploy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - production
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy-infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform Format Check
+        run: |
+          cd infrastructure/terraform/aws
+          terraform fmt -check || echo "Format check failed, but continuing..."
+
+      - name: Terraform Init
+        run: |
+          cd infrastructure/terraform/aws
+          terraform init
+
+      - name: Terraform Validate
+        run: |
+          cd infrastructure/terraform/aws
+          terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd infrastructure/terraform/aws
+          terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: |
+          cd infrastructure/terraform/aws
+          terraform apply -auto-approve tfplan
+
+      - name: Get outputs
+        id: outputs
+        run: |
+          cd infrastructure/terraform/aws
+          echo "cluster_name=$(terraform output -raw cluster_name)" >> $GITHUB_OUTPUT
+          echo "cluster_endpoint=$(terraform output -raw cluster_endpoint)" >> $GITHUB_OUTPUT
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ steps.outputs.outputs.cluster_name }} --region ${{ env.AWS_REGION }}
+
+      - name: Verify cluster
+        run: |
+          kubectl get nodes
+          kubectl get namespaces
+
+      - name: Create deployment summary
+        run: |
+          echo "## Infrastructure Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Cluster Name**: ${{ steps.outputs.outputs.cluster_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Region**: ${{ env.AWS_REGION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ✅ Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Deploy application: Run 'Build and Deploy' workflow" >> $GITHUB_STEP_SUMMARY
+          echo "2. Install monitoring: Run monitoring installation script" >> $GITHUB_STEP_SUMMARY
+          echo "3. Access cluster: \`aws eks update-kubeconfig --name ${{ steps.outputs.outputs.cluster_name }}\`" >> $GITHUB_STEP_SUMMARY

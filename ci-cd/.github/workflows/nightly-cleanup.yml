@@ -1,0 +1,68 @@
+name: Nightly Cleanup
+
+on:
+  schedule:
+    # Run at 2 AM UTC every day (cost optimization)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  cleanup:
+    name: Destroy Demo Environment
+    runs-on: ubuntu-latest
+    # Only run on main branch
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Check if infrastructure exists
+        id: check
+        run: |
+          cd infrastructure/terraform/aws
+          terraform init
+          if terraform show > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Destroy infrastructure
+        if: steps.check.outputs.exists == 'true'
+        run: |
+          cd infrastructure/terraform/aws
+          terraform destroy -auto-approve
+
+      - name: Notify cleanup
+        if: always()
+        run: |
+          if [ "${{ steps.check.outputs.exists }}" == "true" ]; then
+            echo "🧹 Nightly cleanup completed"
+            echo "💰 Saving ~\$5 per night"
+          else
+            echo "ℹ️ No infrastructure to clean up"
+          fi
+
+      - name: Create cleanup report
+        if: always()
+        run: |
+          echo "## Nightly Cleanup Report" >> $GITHUB_STEP_SUMMARY
+          echo "- **Date**: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Infrastructure existed**: ${{ steps.check.outputs.exists }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Estimated savings**: \$5/night" >> $GITHUB_STEP_SUMMARY
