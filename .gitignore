@@ -62,3 +62,5 @@ load-tests/results/*.json
 tmp/
 temp/
 *.tmp
+
+.workspace
